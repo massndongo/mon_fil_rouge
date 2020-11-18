@@ -2,29 +2,41 @@
 
 namespace App\DataFixtures;
 
-use Faker\Factory;
 use App\Entity\Profil;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+
 
 class ProfilFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-        $faker = Factory::create();
-                $profils = [
-                    "ADMIN",
-                    "APPRENANT",
-                    "FORMATEUR",
-                    "CM"
-                ];
-        
-            foreach ($profils as $profil){
-                $libelle = new Profil();
-                $libelle->setLibelle($profil);
-                $manager->persist($libelle);
+        // $product = new Product();
+        // $manager->persist($product);
+        $profil_tab=["ADMIN","FORMATEUR","CM","APPRENANT"];
+
+        foreach ($profil_tab as $lib_profil) {
+            
+            $profil=new Profil();
+            $profil->setLibelle($lib_profil);
+            $profil->setIsDeleted(false);
+            $manager->persist($profil);
+            $manager->flush();
+
+            if ($lib_profil=="ADMIN") {
+                $this->setReference("admin",$profil);
             }
-        $manager->flush();
+            elseif ($lib_profil=="APPRENANT") {
+                $this->setReference("apprenant",$profil);
+            }  
+            elseif ($lib_profil=="FORMATEUR") {
+                $this->setReference("formateur",$profil);
+            }
+            elseif ($lib_profil=="CM") {
+                $this->setReference("cm",$profil);
+            }
+     
+        }
         
     }
 }

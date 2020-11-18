@@ -39,19 +39,21 @@ class User implements UserInterface
     private $prenom;
 
     /**
+     * @var string The hashed password
      * @ORM\Column(type="string", length=255)
      */
     protected $password;
 
     /**
-     * @ORM\ManyToOne(targetEntity=profil::class, inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity="Profil", inversedBy="users")
      */
-    private $profil;
+    protected $profil;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $username;
+    protected $username;
 
     /**
      * @ORM\Column(type="boolean")

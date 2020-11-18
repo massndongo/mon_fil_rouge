@@ -37,15 +37,19 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
             foreach ($profils as $profil) {
                 if ($profil->getLibelle() == "APPRENANT"){
                     $entity = new Apprenant();
+                    $profil=$this->getReference('apprenant');
                     $password = "apprenant";
                 }elseif ($profil->getLibelle() == "FORMATEUR"){
                     $entity = new Formateur();
+                    $profil=$this->getReference('formateur');
                     $password = "formateur";
                 }elseif ($profil->getLibelle()== "ADMIN"){
                     $entity = new Admin();
+                    $profil=$this->getReference('admin');
                     $password = "admin";
                 }elseif($profil->getLibelle()== "CM") {
                     $entity = new Cm();
+                    $profil=$this->getReference('cm');
                     $password = "cm";
                 }
                 $entity->setPrenom($faker->firstName())
@@ -53,8 +57,8 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                     ->setNom($faker->lastName)
                     ->setIsDeleted(false)
                     ->setPassword($this->encoder->encodePassword($entity,$password))
-                    ->setEmail($faker->email)
-                    ->setProfil($profil);
+                    ->setProfil($profil)
+                    ->setEmail($faker->email);
                 $manager->persist($entity);
                 
             }    
