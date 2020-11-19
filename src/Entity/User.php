@@ -4,15 +4,23 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discriminator", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "formateur" = "Formateur", "apprenant" = "Apprenant","cm"="Cm"})
- * @ApiResource()
+ * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiResource(
+ *      routePrefix="/admin",
+ *      normalizationContext={"groups"={"user:read"}}
+ * )
+ * 
  */
 class User implements UserInterface
 {
@@ -25,16 +33,19 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user:read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user:read"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user:read"})
      */
     private $prenom;
 
@@ -52,6 +63,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user:read"})
      */
     protected $username;
 
@@ -59,6 +71,11 @@ class User implements UserInterface
      * @ORM\Column(type="boolean")
      */
     private $isDeleted;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $avatar;
 
     public function getId(): ?int
     {
@@ -183,6 +200,18 @@ class User implements UserInterface
     public function setIsDeleted(bool $isDeleted): self
     {
         $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(string $avatar): self
+    {
+        $this->avatar = $avatar;
 
         return $this;
     }

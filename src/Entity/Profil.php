@@ -4,13 +4,59 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfilRepository;
+use ApiPlatform\Core\Api\FilterInterface;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ApiResource() 
+ * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiResource(
+ *      routePrefix="/admin",
+ *      normalizationContext={"groups"={"profil:read"}},
+ *      collectionOperations={
+ *          "get_profils"={
+ *              "method"="GET",
+ *              "path"="/profils",
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          },
+ *          "create_profil"={
+ *              "method"="POST",
+ *              "path"="/profils",
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          }
+ *       },
+ *      itemOperations={
+ *          "get_profil"={
+ *              "method"="GET",
+ *              "path"="/profils/{id}",
+ *              "requirements"={"id"="\d+"},
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          },
+ *          "update_profil"={
+ *              "method"="PUT",
+ *              "path"="/profils/{id}",
+ *              "requirements"={"id"="\d+"},
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          }
+ *      },
+ *     attributes={
+ *          "pagination_items_per_page"=4,
+ *          "security"="is_granted('ROLE_ADMIN')"
+ *          }
+ * ) 
+ * @UniqueEntity("libelle")
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
  */
 class Profil
@@ -19,18 +65,20 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"profil:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire"),
      * @Groups({"profil:read"})
      */
     private $libelle;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
+     * @Groups({"profil:read","user:read"})
+     * @ApiSubresource
      */
     private $users;
 

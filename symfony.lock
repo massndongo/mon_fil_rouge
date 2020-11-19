@@ -1,4 +1,7 @@
 {
+    "alrik11es/cowsayphp": {
+        "version": "1.2.0"
+    },
     "api-platform/api-pack": {
         "version": "v1.3.0"
     },
@@ -115,6 +118,9 @@
     },
     "fzaninotto/faker": {
         "version": "v1.9.1"
+    },
+    "heroku/heroku-buildpack-php": {
+        "version": "v183"
     },
     "knplabs/knp-components": {
         "version": "v2.4.2"
