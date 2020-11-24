@@ -3,8 +3,9 @@
 namespace App\DataFixtures;
 
 use App\Entity\Profil;
-use Doctrine\Bundle\FixturesBundle\Fixture;
+use App\Entity\Referentiel;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 
 
 class ProfilFixtures extends Fixture
@@ -21,7 +22,6 @@ class ProfilFixtures extends Fixture
             $profil->setLibelle($lib_profil);
             $profil->setIsDeleted(false);
             $manager->persist($profil);
-            $manager->flush();
 
             if ($lib_profil=="ADMIN") {
                 $this->setReference("admin",$profil);
@@ -37,6 +37,19 @@ class ProfilFixtures extends Fixture
             }
      
         }
+        $times = 3;
+        for ($i=0; $i < $times; $i++) {
+            $entity = new Referentiel();
+            $entity->setLibelle('Libelle '.$i)
+                ->setPresentation('Presentation '.$i)
+                ->setProgramme('Programme '.$i)
+                ->setCritereAdmission('CritereAdmission '.$i)
+                ->setCritereEvaluation('CritereEvaluation '.$i)
+                ->setIsDeleted(false);
+            $manager->persist($entity);
         
-    }
+        }
+
+    $manager->flush();
+}
 }

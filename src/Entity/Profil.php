@@ -49,6 +49,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *              "requirements"={"id"="\d+"},
  *              "security"="is_granted('ROLE_ADMIN')",
  *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          },
+ *          "delete"={
+ *              "method"="DELETE",
+ *              "path"="/profils/{id}",
+ *              "requirements"={"id"="\d+"},
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
  *          }
  *      },
  *     attributes={
@@ -71,21 +78,22 @@ class Profil
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire"),
-     * @Groups({"profil:read"})
+     * @Groups({"user","profil:read","user:read"})
      */
     private $libelle;
 
     /**
-     * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
-     * @Groups({"profil:read","user:read"})
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil", cascade="persist")
+     * @Groups({"profil:read","profilUsers:read"})
      * @ApiSubresource
      */
     private $users;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"profil:read"})
      */
-    private $isDeleted;
+    private $isDeleted=false;
 
     public function __construct()
     {
@@ -96,7 +104,6 @@ class Profil
     {
         return $this->id;
     }
-
     public function getLibelle(): ?string
     {
         return $this->libelle;

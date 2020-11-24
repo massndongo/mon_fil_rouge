@@ -6,8 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
@@ -16,9 +19,46 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  * @ORM\DiscriminatorColumn(name="discriminator", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "formateur" = "Formateur", "apprenant" = "Apprenant","cm"="Cm"})
  * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiFilter(SearchFilter::class, properties={"profil": "exact"})
  * @ApiResource(
  *      routePrefix="/admin",
- *      normalizationContext={"groups"={"user:read"}}
+ *      normalizationContext={"groups"={"user:read"}},
+ *      denormalizationContext={"groups"={"user"}},
+ *      collectionOperations={
+*          "create_user"={
+*              "method"="POST",
+*              "path"="/users",
+*              "security"="is_granted('ROLE_ADMIN')",
+*              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          },
+ *          "get_users"={
+ *              "method"="GET",
+ *              "path"="/users",
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          }
+ *      },
+ *      itemOperations={
+ *          "delete_user"={
+*              "method"="DELETE",
+*              "path"="/users/{id}",
+*              "security"="is_granted('ROLE_ADMIN')",
+*              "security_message"="Vous n'avez pas access à cette Ressource"   
+ *          },
+ *          "update_user"={
+ *              "deserialize"=false,
+*              "method"="PUT",
+*              "path"="/users/{id}",
+*              "security"="is_granted('ROLE_ADMIN')",
+*              "security_message"="Vous n'avez pas access à cette Ressource"   
+ *          },
+ *          "get_user"={
+ *              "method"="GET",
+ *              "path"="/users/{id}",
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *          }
+ *      }      
  * )
  * 
  */
@@ -33,47 +73,60 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user:read"})
+     * @Groups({"user","user:read","profilUsers:read"})
+     * @Assert\NotBlank(message="Le nom est obligatoire")
      */
     private $nom;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups({"user:read"})
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Groups({"user","user:read","profilUsers:read"})
+     * @Assert\NotBlank(message="L'email est obligatoire")
+     * @Assert\Email(
+     *     message="Veuillez saisir un email valide."
+     * )
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user:read"})
+     * @Groups({"user","user:read","profilUsers:read"})
+     * @Assert\NotBlank(message="Le prenom est obligatoire")
      */
     private $prenom;
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user"})
+     * @Assert\NotBlank(message="Le password est obligatoire")
      */
     protected $password;
 
     /**
      * @ORM\JoinColumn(nullable=false)
-     * @ORM\ManyToOne(targetEntity="Profil", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="Profil", inversedBy="users",cascade={"persist"})
+     * @ApiSubresource()
+     * @Groups({"user","user:read"})
      */
     protected $profil;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups({"user:read"})
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank(message="Le username est obligatoire")
+     * @Groups({"user","user:read"})
      */
     protected $username;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"user"})
      */
-    private $isDeleted;
+    private $isDeleted=false;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="blob")
+     * @Groups({"user"})
      */
     private $avatar;
 
@@ -126,7 +179,7 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function getNom(): ?string
@@ -204,12 +257,12 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getAvatar(): ?string
+    public function getAvatar()
     {
-        return $this->avatar;
+        return base64_encode(stream_get_contents($this->avatar));
     }
 
-    public function setAvatar(string $avatar): self
+    public function setAvatar($avatar): self
     {
         $this->avatar = $avatar;
 

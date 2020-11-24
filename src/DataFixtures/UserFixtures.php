@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataFixtures;
+    namespace App\DataFixtures;
 
 use App\Entity\Cm;
 use Faker\Factory;
@@ -30,7 +30,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
         $faker = Factory::create();
         $profils = $this->profilRepository->findAll();
         
-        $times = 10;
+        $times = 3;
         for ($i=0; $i < $times; $i++) { 
             $password = "";
             $entity = null;
@@ -58,6 +58,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                     ->setIsDeleted(false)
                     ->setPassword($this->encoder->encodePassword($entity,$password))
                     ->setProfil($profil)
+                    ->setAvatar("Tof ".$i)
                     ->setEmail($faker->email);
                 $manager->persist($entity);
                 
