@@ -37,18 +37,8 @@ class ProfilFixtures extends Fixture
             }
      
         }
-        $times = 3;
-        for ($i=0; $i < $times; $i++) {
-            $entity = new Referentiel();
-            $entity->setLibelle('Libelle '.$i)
-                ->setPresentation('Presentation '.$i)
-                ->setProgramme('Programme '.$i)
-                ->setCritereAdmission('CritereAdmission '.$i)
-                ->setCritereEvaluation('CritereEvaluation '.$i)
-                ->setIsDeleted(false);
-            $manager->persist($entity);
         
-        }
+        
 
     $manager->flush();
 }

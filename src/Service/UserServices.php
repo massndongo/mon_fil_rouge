@@ -11,9 +11,10 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\UserRepository;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -23,51 +24,80 @@ class UserServices{
    private $serializer;
    private $encoder;
    private $profilRepo;
+   private $validator;
+   private $manager;
 
-     public function __construct(DenormalizerInterface $denormalizer, SerializerInterface $serializer ,UserPasswordEncoderInterface $encoder, ProfilRepository $profilRepo){
-	  $this->serializer = $serializer;
-	  $this->denormalize = $denormalizer;
-      $this->encoder = $encoder;
-      $this->repo = $profilRepo;
+     public function __construct(UserRepository $userRepo, EntityManagerInterface $manager, ValidatorInterface $validator, DenormalizerInterface $denormalizer, SerializerInterface $serializer ,UserPasswordEncoderInterface $encoder, ProfilRepository $profilRepo){
+        $this->serializer = $serializer;
+        $this->validator = $validator;
+        $this->manager = $manager;
+        $this->denormalize = $denormalizer;
+        $this->encoder = $encoder;
+        $this->repo = $profilRepo;
+        $this->userRepo = $userRepo;
      }
 
-    public function addUser(Request $request,$manager){
-      
-	  $data = $request->request->all();
-	  $prf = $data["profil"];
-	  $profile = $this->repo->findOneByLibelle($prf);
-	  $profil = strtoupper(strtolower($profile->getLibelle()));
+    public function addUser(Request $request,$todo){
+      if ($todo=="create") {
+              
+        $data = $request->request->all();
+        $prf = $data["role"];
+        $profile = $this->repo->find($prf);
+        $profil = strtoupper(strtolower($profile->getLibelle()));
 
-      $uploadedFile = $request->files->get('avatar');
+          $uploadedFile = $request->files->get('avatar');
 
-      if($uploadedFile){
-        $file = $uploadedFile->getRealPath();
-        $avatar = fopen($file, 'r+');
-        $data['avatar'] = $avatar;
+          if($uploadedFile){
+            $file = $uploadedFile->getRealPath();
+            $avatar = fopen($file, 'r+');
+            $data['avatar'] = $avatar;
+          }
+
+          if($profil=='ADMIN'){
+            $userType = Admin::class;
+          }elseif ($profil=='FORMATEUR') {
+            $userType = Formateur::class;
+          }elseif ($profil=='CM') {
+            $userType = Cm::class;
+          }elseif ($profil=='APPRENANT') {
+            $userType = Apprenant::class;
+        }
+
+          $user = $this->denormalize->denormalize($data, $userType, 'json');
+          $user->setIsDeleted(false);
+          $user->setProfil($profile);
+
+          $password = $user->getPassword();
+          $user->setPassword($this->encoder->encodePassword($user,$password));
+
+          return $user;
+
+	  }else {
+      $data = $request->request->all();
+      $user = $this->userRepo->findOneBy(["id"=>$todo]);
+      if ($data["username"]) {
+        $user->setUsername($data["username"]);
       }
-
-      if($profil=='ADMIN'){
-        $userType = Admin::class;
-      }elseif ($profil=='FORMATEUR') {
-        $userType = Formateur::class;
-      }elseif ($profil=='CM') {
-        $userType = Cm::class;
-      }elseif ($profil=='APPRENANT') {
-        $userType = Apprenant::class;
-	  }
-	  dd($data);
-
-      $user = $this->denormalize->denormalize($data, $userType, 'json');
-
-      $user->setProfil($prf);
-
-      $password = $user->getPassword();
-      $user->setPassword($this->encoder->encodePassword($user,$password));
-
-      $manager->persist($user);
-      $manager->flush();
-
-      return $user;
-
-	}
+      if($data["password"]){
+        $password = $user->getPassword();
+        $user->setPassword($this->encoder->encodePassword($user, $password));
+      }
+      $uploadedFile = $request->files->get('avatar');
+        if($uploadedFile){
+          $file = $uploadedFile->getRealPath();
+          $avatar = fopen($file, 'r+');
+          $user->setAvatar($avatar);
+        }
+        if ($data["nom"]) {
+          $user->setNom($data["nom"]);
+        }
+        if ($data["prenom"]) {
+          $user->setPrenom($data["prenom"]);
+        }
+        if ($data["email"]) {
+          $user->setEmail($data["email"]);
+        }
+    }
+    $this->manager->persist($user);
+  }
 }

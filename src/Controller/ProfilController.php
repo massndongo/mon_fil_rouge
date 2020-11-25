@@ -7,6 +7,7 @@ use App\Repository\ProfilRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ProfilController extends AbstractController
@@ -19,14 +20,14 @@ class ProfilController extends AbstractController
     PROFIL_READ = "profil:read",
     PROFIL_USERS = "profilUsers:read";
 
-    public function __construct(ProfilRepository $profilRepository,SerializerInterface $serializer)
+    public function __construct(ProfilRepository $profilRepository,NormalizerInterface $serializer)
     {
     $this->profilRepository = $profilRepository;
     $this->serializer = $serializer;
     }
 /**
      * @Route(
-     *     path="/api/admins/profils/{id<\d+>}/users",
+     *     path="/api/admin/profils/{id<\d+>}/users",
      *     methods={"GET"},
      * )
      */

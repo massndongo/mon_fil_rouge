@@ -72,6 +72,7 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profilUsers:read"})
      */
     private $id;
 
@@ -93,11 +94,12 @@ class Profil
      * @ORM\Column(type="boolean")
      * @Groups({"profil:read"})
      */
-    private $isDeleted=false;
+    private $isDeleted;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->isDeleted = false;
     }
 
     public function getId(): ?int

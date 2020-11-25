@@ -2,15 +2,36 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ApprenantRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
- * @ORM\Entity(repositoryClass=ApprenantRepository::class)
- * @ApiResource()
+ * @ORM\Entity(repositoryClass=ApprenantRepository::class) 
+ * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiResource(
+ *      normalizationContext={"groups"={"user:read"}},
+ *      denormalizationContext={"groups"={"user"}},
+*       attributes={
+*           "security"="is_granted('ROLE_APPRENANT')",
+*          "security_message"="Vous n'avez pas access à cette Ressource"
+*        },
+ *      itemOperations={
+ *          "delete_apprenant"={
+*              "method"="DELETE",
+*              "path"="/apprenants/{id}"  
+ *          },
+ *          "update_apprenant"={
+ *              "deserialize"=false,
+*              "method"="PUT",
+*              "path"="/apprenants/{id}"  
+ *          }
+ *      }      
+ * )
  */
 class Apprenant extends User
 {

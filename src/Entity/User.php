@@ -24,39 +24,33 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *      routePrefix="/admin",
  *      normalizationContext={"groups"={"user:read"}},
  *      denormalizationContext={"groups"={"user"}},
+ *      attributes={
+ *          "security"="is_granted('ROLE_ADMIN')",
+ *          "security_message"="Vous n'avez pas access à cette Ressource"
+ *      },
  *      collectionOperations={
 *          "create_user"={
 *              "method"="POST",
-*              "path"="/users",
-*              "security"="is_granted('ROLE_ADMIN')",
-*              "security_message"="Vous n'avez pas access à cette Ressource"
+*              "path"="/users"
  *          },
  *          "get_users"={
  *              "method"="GET",
- *              "path"="/users",
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *              "path"="/users"
  *          }
  *      },
  *      itemOperations={
  *          "delete_user"={
 *              "method"="DELETE",
-*              "path"="/users/{id}",
-*              "security"="is_granted('ROLE_ADMIN')",
-*              "security_message"="Vous n'avez pas access à cette Ressource"   
+*              "path"="/users/{id}"  
  *          },
  *          "update_user"={
  *              "deserialize"=false,
 *              "method"="PUT",
-*              "path"="/users/{id}",
-*              "security"="is_granted('ROLE_ADMIN')",
-*              "security_message"="Vous n'avez pas access à cette Ressource"   
+*              "path"="/users/{id}"  
  *          },
  *          "get_user"={
  *              "method"="GET",
- *              "path"="/users/{id}",
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
+ *              "path"="/users/{id}"
  *          }
  *      }      
  * )
@@ -68,6 +62,7 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profilUsers:read"})
      */
     protected $id;
 
@@ -122,7 +117,7 @@ class User implements UserInterface
      * @ORM\Column(type="boolean")
      * @Groups({"user"})
      */
-    private $isDeleted=false;
+    private $isDeleted;
 
     /**
      * @ORM\Column(type="blob")
@@ -133,6 +128,10 @@ class User implements UserInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+    public function __construct()
+    {
+        $this->isDeleted = false;
     }
     /**
      * A visual identifier that represents this user.

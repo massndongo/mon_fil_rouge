@@ -1,28 +1,19 @@
 <?php
-// src/DataPersister/UserDataPersister.php
 
 namespace App\DataPersister;
 
-use App\Entity\User;
+use App\Entity\Profil;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-/**
- *
- */
-
-class UserDataPersister implements ContextAwareDataPersisterInterface
+class ProfilDataPersister implements ContextAwareDataPersisterInterface
 {
     private $_entityManager;
-    private $_passwordEncoder;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        UserPasswordEncoderInterface $passwordEncoder
+        EntityManagerInterface $entityManager
     ) {
         $this->_entityManager = $entityManager;
-        $this->_passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -30,7 +21,7 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
      */
     public function supports($data, array $context = []): bool
     {
-        return $data instanceof User;
+        return $data instanceof Profil;
     }
 
     /**
@@ -51,8 +42,13 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
     
     public function remove($data, array $context = [])
     {
-        $data->setIsDeleted(true);
-        //$this->_entityManager->remove($data);
+        $archive = $data->setIsDeleted(true);
+        $this->_entityManager-> persist($archive);
+        $users = $data->getUsers();
+        foreach ($users as $user) {
+            $archiveUser = $user->setIsDeleted(true);
+            $this->_entityManager-> persist($archiveUser);
+        }
         $this->_entityManager->flush();
     }
 }

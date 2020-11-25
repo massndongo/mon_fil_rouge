@@ -10,7 +10,43 @@ use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
  * @ORM\Entity(repositoryClass=FormateurRepository::class)
-     * @ApiResource()
+ * @ApiResource(
+ *      attributes={
+ *          "security"="is_granted('ROLE_FORMATEUR')",
+ *          "security_message"="Vous n'avez pas access à cette Ressource"
+ *      },
+ *      collectionOperations={
+    *          "create_apprenant"={
+    *              "method"="POST",
+    *              "path"="/apprenants"
+    *          },
+    *          "get_apprenants"={
+    *              "method"="GET",
+    *              "path"="/apprenants"
+    *          }
+ *      },
+ *      itemOperations={
+ *          "update_formateur"={
+ *              "deserialize"=false,
+*              "method"="PUT",
+*              "path"="/formateurs{/id}"  
+ *          },
+ *          "update_apprenant"={
+ *              "deserialize"=false,
+*              "method"="PUT",
+*              "path"="/apprenants/{id}"  
+ *          },
+ *          "get_apprenant"={
+ *              "method"="GET",
+ *              "path"="/apprenants/{id}"
+ *          },
+ *          "get_formateur"={
+ *              "method"="GET",
+ *              "path"="/formateurs/{id}"
+ *          }
+ *      }      
+ *      
+ * )
  */
 class Formateur extends User
 {

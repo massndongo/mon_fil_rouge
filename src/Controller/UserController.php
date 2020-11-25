@@ -20,22 +20,35 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
 {
+    public function __construct(UserServices $userService, EntityManagerInterface $manager){
+        $this->userService = $userService;
+        $this->manager = $manager;
+    }
     /**
      * @Route(
      *     path="/api/admin/users",
-     *     methods={"POST"},
-     *     defaults={
-     *          "__controller"="App\Controller\UserController::addUser",
-     *          "__api_resource_class"=User::class,
-     *          "__api_collection_operation_name"="add_user"
-     *     }
+     *     methods={"POST"}
      * )
     */
-    public function addUser(UserServices $userservice,Request $request,UserPasswordEncoderInterface $encoder,SerializerInterface $serializer,ValidatorInterface $validator,ProfilRepository $profil,EntityManagerInterface $manager)
+    public function addUsers(UserServices $userService,Request $request)
     {
-        $userservice->addUser($request,$manager);
-
-        return $this->json($userservice,Response::HTTP_OK);
+        $todo="create";
+        $this->userService->addUser($request,$todo);
+        
+        return $this->json($userService,Response::HTTP_OK);
+    }
+    /**
+     * @Route(
+     * path="/api/admin/users/{id}",
+     * methods={"PUT"}
+     * )
+    */
+    public function updateUsers(UserServices $userService,Request $request,$id)
+    {
+        $todo = $id;
+        $this->userService->addUser($request,$todo);
+        $this->manager->flush();
+        return $this->json($userService,Response::HTTP_OK);
     }
     /**
      * @Route(

@@ -2,16 +2,51 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AdminRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ORM\Entity(repositoryClass=AdminRepository::class)
- * @ORM\Table(name="`admin`")
- * @ApiResource()
+ * @ORM\Table(name="`admin`") 
+ * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiResource(
+ *      normalizationContext={"groups"={"user:read"}},
+ *      denormalizationContext={"groups"={"user"}},
+ *      attributes={
+ *          "security"="is_granted('ROLE_ADMIN')",
+ *          "security_message"="Vous n'avez pas access à cette Ressource"
+ *      },
+ *      collectionOperations={
+*          "create_admin"={
+*              "method"="POST",
+*              "path"="/admin"
+ *          },
+ *          "get_admin"={
+ *              "method"="GET",
+ *              "path"="/admin"
+ *          }
+ *      },
+ *      itemOperations={
+ *          "delete_admin"={
+*              "method"="DELETE",
+*              "path"="/admin/{id}"  
+ *          },
+ *          "update_admin"={
+ *              "deserialize"=false,
+*              "method"="PUT",
+*              "path"="/admin/{id}"  
+ *          },
+ *          "get_admin"={
+ *              "method"="GET",
+ *              "path"="/admin/{id}"
+ *          }
+ *      }      
+ * )
  */
 class Admin extends User
 {

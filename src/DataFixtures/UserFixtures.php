@@ -4,9 +4,7 @@
 
 use App\Entity\Cm;
 use Faker\Factory;
-use App\Entity\User;
 use App\Entity\Admin;
-use App\Entity\Profil;
 use App\Entity\Apprenant;
 use App\Entity\Formateur;
 use App\DataFixtures\ProfilFixtures;
