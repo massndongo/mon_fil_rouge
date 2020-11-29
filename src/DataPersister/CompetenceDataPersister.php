@@ -1,17 +1,14 @@
 <?php
-// src/DataPersister/UserDataPersister.php
 
 namespace App\DataPersister;
 
-use App\Entity\User;
+use App\Entity\Competence;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 
-/**
- *
- */
-
-class UserDataPersister implements ContextAwareDataPersisterInterface
+class CompetenceDataPersister implements ContextAwareDataPersisterInterface
 {
     private $_entityManager;
 
@@ -26,7 +23,7 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
      */
     public function supports($data, array $context = []): bool
     {
-        return $data instanceof User;
+        return $data instanceof Competence;
     }
 
     /**
@@ -34,9 +31,6 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
      */
     public function persist($data, array $context = [])
     {
-        $this->_entityManager->persist($data);
-        $this->_entityManager->flush();
-
        return $data;
     }
 
@@ -47,11 +41,14 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
     
     public function remove($data, array $context = [])
     {
-        if (empty($data)) {
+        $archive = $data->setIsDeleted(true);
+        $this->_entityManager-> persist($archive);
+        $groupes = $data->getGroupeCompetences();
+        foreach ($groupes as $groupe) {
+            $archiveCompetence = $groupe->setIsDeleted(true);
+            $this->_entityManager-> persist($archiveCompetence);
         }
-        $data->setIsDeleted(true);
-        $this->_entityManager->persist($data);
-        //$this->_entityManager->remove($data);
         $this->_entityManager->flush();
+        return $this->json($archiveCompetence, Response::HTTP_OK);
     }
 }

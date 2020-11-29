@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
@@ -29,6 +30,10 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *              "deserialize"=false,
 *              "method"="PUT",
 *              "path"="/apprenants/{id}"  
+ *          },
+ *          "get_apprenant"={
+*              "method"="GET",
+*              "path"="/apprenants/{id}"  
  *          }
  *      }      
  * )
@@ -39,6 +44,7 @@ class Apprenant extends User
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profilSortie:read"})
      */
     protected $id;
 

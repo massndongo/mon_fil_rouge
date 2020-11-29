@@ -6,6 +6,7 @@ use App\Entity\Cm;
 use App\Entity\Admin;
 use App\Entity\Apprenant;
 use App\Entity\Formateur;
+use App\Repository\UserRepository;
 use App\Repository\ProfilRepository;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use App\Repository\UserRepository;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -36,6 +36,16 @@ class UserServices{
         $this->repo = $profilRepo;
         $this->userRepo = $userRepo;
      }
+     public function getUserType($profil)
+     {
+         switch ($profil->getLibelle())
+         {
+             case "ADMIN": return "App\Entity\User";
+             case "FORMATEUR": return "App\Entity\Formateur";
+             case "APPRENANT": return "App\Entity\Apprenant";
+             case "CM": return "App\Entity\CM";
+         }
+     }
 
     public function addUser(Request $request,$todo){
       if ($todo=="create") {
@@ -43,7 +53,6 @@ class UserServices{
         $data = $request->request->all();
         $prf = $data["role"];
         $profile = $this->repo->find($prf);
-        $profil = strtoupper(strtolower($profile->getLibelle()));
 
           $uploadedFile = $request->files->get('avatar');
 
@@ -52,21 +61,11 @@ class UserServices{
             $avatar = fopen($file, 'r+');
             $data['avatar'] = $avatar;
           }
-
-          if($profil=='ADMIN'){
-            $userType = Admin::class;
-          }elseif ($profil=='FORMATEUR') {
-            $userType = Formateur::class;
-          }elseif ($profil=='CM') {
-            $userType = Cm::class;
-          }elseif ($profil=='APPRENANT') {
-            $userType = Apprenant::class;
-        }
+          $userType = $this->getUserType($profile);
 
           $user = $this->denormalize->denormalize($data, $userType, 'json');
           $user->setIsDeleted(false);
           $user->setProfil($profile);
-
           $password = $user->getPassword();
           $user->setPassword($this->encoder->encodePassword($user,$password));
 
@@ -98,6 +97,6 @@ class UserServices{
           $user->setEmail($data["email"]);
         }
     }
-    $this->manager->persist($user);
+    return $user;
   }
 }

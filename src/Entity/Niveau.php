@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\NiveauRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\NiveauRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=NiveauRepository::class)
@@ -19,16 +20,19 @@ class Niveau
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"competence:write","competence:read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"competence:write","competence:read"})
      */
     private $critereEvaluation;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"competence:write","competence:read"})
      */
     private $groupeAction;
 
@@ -38,7 +42,7 @@ class Niveau
     private $isDeleted=false;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Competence::class, inversedBy="niveaux")
+     * @ORM\ManyToOne(targetEntity=Competence::class, inversedBy="niveaux", cascade={"persist"})
      */
     private $competence;
 

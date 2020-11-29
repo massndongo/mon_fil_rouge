@@ -2,45 +2,39 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Entity\Apprenant;
-use App\Service\UserServices;
-use App\Repository\UserRepository;
 use App\Repository\ProfilRepository;
+use App\Repository\UserRepository;
+use App\Service\UserServices;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class UserController extends AbstractController
+class ApprenantController extends AbstractController
 {
-    public function __construct(UserServices $userService, EntityManagerInterface $manager){
+    public function __construct(UserServices $userService, EntityManagerInterface $manager, ProfilRepository $repo){
         $this->userService = $userService;
         $this->manager = $manager;
+        $this->repo = $repo;
     }
     /**
      * @Route(
-     *     path="/api/admin/users",
+     *     path="/api/apprenants",
      *     methods={"POST"}
      * )
     */
-    public function addUsers(UserServices $userService,Request $request)
+    public function addApprenants(UserServices $userService,Request $request)
     {
         $todo="create";
         $user = $this->userService->addUser($request,$todo);
         $this->manager->persist($user);
         $this->manager->flush();
-        return $this->json($userService,Response::HTTP_CREATED);
+        return $this->json($user,Response::HTTP_CREATED);
     }
     /**
      * @Route(
-     * path="/api/admin/users/{id}",
+     * path="/api/apprenants/{id}",
      * methods={"PUT"}
      * )
     */
@@ -50,6 +44,6 @@ class UserController extends AbstractController
         $user = $this->userService->addUser($request,$todo);
         $this->manager->persist($user);
         $this->manager->flush();
-        return $this->json($userService,Response::HTTP_OK);
+        return $this->json($user,Response::HTTP_OK);
     }
 }

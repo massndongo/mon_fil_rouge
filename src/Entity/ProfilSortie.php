@@ -4,60 +4,50 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiFilter;
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\ProfilSortieRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
  * @ApiResource(
  *      routePrefix="/admin",
+ *      normalizationContext={"groups"={"profilSortie:read"}},
  *      collectionOperations={
  *              "get_all_profil_sortie"={
  *                  "method"="GET",
- *                  "path"="/profilsorties",
- *                  "security"="is_granted('ROLE_CM')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                  "path"="/profilsorties"
  *              },
  *              "get_student_in_promo_by_profil_sortie"={
  *                  "method"="GET",
  *                  "path"="/promo/{id}/profilsorties",
- *                  "security"="is_granted('ROLE_CM')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
  *              },
  *              "create_profil_sortie"={
  *                  "method"="POST",
- *                  "path"="/profilsorties",
- *                  "security"="is_granted('ROLE_CM')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                  "path"="/profilsorties"
  *              }
  *      },
  *      itemOperations={
  *              "get_one_profil_sortie"={
  *                  "method"="GET",
  *                  "path"="/profilsorties/{id}",
- *                  "security"="is_granted('ROLE_CM')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
  *              },
  *              "get_student_profil_sortie_promo"={
  *                  "method"="GET",
- *                  "path"="/promo/{id}/profilsorties/{idP}",
- *                  "security"="is_granted('ROLE_FORMATEUR')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                  "path"="/promo/{id}/profilsorties/{idP}"
  *              },
  *              "update_profil_sortie"={
  *                  "method"="PUT",
- *                  "path"="/profilsorties/{id}",
- *                  "security"="is_granted('ROLE_FORMATEUR')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                  "path"="/profilsorties/{id}"
  *              }
  *          
  *      },
  *     attributes={
- *          "pagination_items_per_page"=2
+ *          "pagination_items_per_page"=6
  *          },
  *
  * )
@@ -69,17 +59,20 @@ class ProfilSortie
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profilSortie:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Assert\NotBlank(message="Le libelle est obligatoire"),
+     * @Assert\NotBlank(message="Le libelle est obligatoire")
+     * @Groups({"profilSortie:read"})
      */
     private $libelle;
 
     /**
      * @ORM\OneToMany(targetEntity=Apprenant::class, mappedBy="profilSortie")
+     * @Groups({"profilSortie:read"})
      */
     private $apprenant;
 

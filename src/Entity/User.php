@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -19,7 +20,6 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  * @ORM\DiscriminatorColumn(name="discriminator", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "formateur" = "Formateur", "apprenant" = "Apprenant","cm"="Cm"})
  * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
- * @ApiFilter(SearchFilter::class, properties={"profil": "exact"})
  * @ApiResource(
  *      routePrefix="/admin",
  *      normalizationContext={"groups"={"user:read"}},
@@ -55,6 +55,8 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *      }      
  * )
  * 
+ * 
+ * @UniqueEntity("username",message="Le username est unique")
  */
 class User implements UserInterface
 {
@@ -62,20 +64,21 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"profilUsers:read"})
+     * @Groups({"user","user:read"})
+     * 
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user","user:read","profilUsers:read"})
+     * @Groups({"user","user:read","profilUsers:read","profilSortie:read"})
      * @Assert\NotBlank(message="Le nom est obligatoire")
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Groups({"user","user:read","profilUsers:read"})
+     * @Groups({"user","user:read","profilUsers:read","profilSortie:read"})
      * @Assert\NotBlank(message="L'email est obligatoire")
      * @Assert\Email(
      *     message="Veuillez saisir un email valide."
@@ -85,7 +88,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user","user:read","profilUsers:read"})
+     * @Groups({"user","user:read","profilUsers:read","profilSortie:read"})
      * @Assert\NotBlank(message="Le prenom est obligatoire")
      */
     private $prenom;
@@ -107,7 +110,7 @@ class User implements UserInterface
     protected $profil;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le username est obligatoire")
      * @Groups({"user","user:read"})
      */
@@ -115,7 +118,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"user"})
+     * @Groups({"user","user:read"})
      */
     private $isDeleted;
 

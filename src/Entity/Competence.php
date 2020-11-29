@@ -2,14 +2,38 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\CompetenceRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CompetenceRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *      denormalizationContext={"groups"={"competence:write"}},
+ *      normalizationContext={"groups"={"competence:read"}},
+ *      collectionOperations={
+*          "create_competences"={
+*              "method"="POST",
+*              "path"="/admin/competences"
+            },
+ *          "get_all_competence"={
+ *              "method"="GET",
+ *              "path"="/admin/competences"
+ *          }
+ *      },
+ *      itemOperations={
+ *          "get_competence"={
+ *              "method"="GET",
+ *              "path"="/admin/competences/{id}"
+ *          },
+ *          "delete_competence"={
+ *              "method"="DELETE",
+ *              "path"="/admin/competences/{id}"
+ *          }
+ *      }
+ * )
  * @ORM\Entity(repositoryClass=CompetenceRepository::class)
  */
 class Competence
@@ -18,30 +42,36 @@ class Competence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"competence:read","grpecompetence;write"})
      */
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences")
+     * @Groups({"competence:write","competence:read"})
+     * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences", cascade={"persist"})
      */
     private $groupeCompetences;
 
     /**
+     * @Groups({"competence:write","competence:read"})
      * @ORM\Column(type="string", length=255)
      */
     private $libelle;
 
     /**
+     * @Groups({"competence:write","competence:read"})
      * @ORM\Column(type="string", length=255)
      */
     private $descriptif;
 
     /**
+     * @Groups({"competence:write","competence:read"})
      * @ORM\Column(type="boolean")
      */
     private $isDeleted;
 
     /**
+     * @Groups({"competence:write","competence:read"})
      * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competence")
      */
     private $niveaux;
@@ -69,7 +99,6 @@ class Competence
     {
         if (!$this->groupeCompetences->contains($groupeCompetence)) {
             $this->groupeCompetences[] = $groupeCompetence;
-            $groupeCompetence->addCompetence($this);
         }
 
         return $this;
