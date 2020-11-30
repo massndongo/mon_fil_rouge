@@ -15,7 +15,8 @@ class ProfilSortieFixtures extends Fixture
         foreach ($tabProfil as $profil) {
            
             $prf= new ProfilSortie();
-            $prf->setLibelle($profil);
+            $prf->setLibelle($profil)
+                ->setIsDeleted(false);
            $manager->persist($prf);
         } 
         // $product = new Product();

@@ -68,6 +68,7 @@ class GroupeCompetenceController extends AbstractController
             if($id)
             {
                 $skill = $competenceRepository->findOneBy(["id" => $id]);
+                dd($skill);
                 if(!$skill)
                     {return $this->json($skill,Response::HTTP_NOT_FOUND,["message" => "La competence avec l'id : $id, n'existe pas."]);}
                 }else{
