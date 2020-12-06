@@ -2,16 +2,20 @@
 
 namespace App\Entity;
 
+
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GroupeCompetenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource(
  *      denormalizationContext={"groups"={"grpecompetence:write"}},
+ *      normalizationContext={"groups"={"grpecompetence:read"}},
  *      collectionOperations={
 *          "create_grpecompetences"={
 *              "method"="POST",
@@ -20,6 +24,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *          "get_all_grpecompetence"={
  *              "method"="GET",
  *              "path"="/admin/grpecompetences"
+ *          },
+ *          "get_all_competences_in_grpecompetence"={
+ *              "method"="GET",
+ *              "path"="/admin/grpecompetences/competences"
  *          }
  *      },
  *      itemOperations={
@@ -27,13 +35,22 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *              "method"="GET",
  *              "path"="/admin/grpecompetences/{id}"
  *          },
- *          "delete_competence"={
+ *          "get_grpecompetences_grpecompetences"={
+ *              "method"="GET",
+ *              "path"="/admin/grpecompetences/{id}/competences"
+ *          },
+ *          "delete_grpecompetence"={
  *              "method"="DELETE",
+ *              "path"="/admin/grpecompetences/{id}"
+ *          },
+ *          "set_grpecompetence"={
+ *              "method"="PUT",
  *              "path"="/admin/grpecompetences/{id}"
  *          }
  *      }
  * )
  * @ORM\Entity(repositoryClass=GroupeCompetenceRepository::class)
+ * @UniqueEntity("libelle",message="Le libelle est unique")
  */
 class GroupeCompetence
 {
@@ -41,19 +58,21 @@ class GroupeCompetence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:read","grpecompetence:read","compRef:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:read","grpecompetence:write"})
+     * @Groups({"competence:read","grpecompetence:read","grpecompetence:write","grpeCompRef:read"})
+     * @Assert\NotBlank(message="Le libelle est obligatoire")
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:read","grpecompetence:write"})
+     * @Groups({"competence:read","grpecompetence:write","grpeCompRef:read"})
+     * @Assert\NotBlank(message="Le desciptif est obligatoire")
      */
     private $descriptif;
 
@@ -64,18 +83,20 @@ class GroupeCompetence
 
     /**
      * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupeCompetences", cascade={"persist"})
-     * @Groups({"grpecompetence:write"})
+     * @Groups({"grpecompetence:read","grpecompetence:write","grpeCompRef:read","compRef:read"})
+     * @Assert\NotBlank(message="Le champ competence est obligatoire")
      */
     private $competences;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"grpecompetence:write"})
+     * @Groups({"grpecompetence:read"})
      */
     private $isDeleted;
 
     /**
      * @ORM\ManyToMany(targetEntity=Referentiel::class, mappedBy="groupeCompetence")
+     * @Groups({"grpecompetence:read"})
      */
     private $referentiels;
 
@@ -83,6 +104,7 @@ class GroupeCompetence
     {
         $this->competences = new ArrayCollection();
         $this->referentiels = new ArrayCollection();
+        $this->isDeleted = false;
     }
 
     public function getId(): ?int

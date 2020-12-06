@@ -124,7 +124,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="blob")
-     * @Groups({"user"})
+     * @Groups({"user","user:read"})
      */
     private $avatar;
 

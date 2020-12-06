@@ -2,13 +2,13 @@
 
 namespace App\DataPersister;
 
-use App\Entity\Competence;
+use App\Entity\GroupeCompetence;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 
-class CompetenceDataPersister implements ContextAwareDataPersisterInterface
+class GroupeCompetenceDataPersister implements ContextAwareDataPersisterInterface
 {
     private $_entityManager;
 
@@ -23,14 +23,15 @@ class CompetenceDataPersister implements ContextAwareDataPersisterInterface
      */
     public function supports($data, array $context = []): bool
     {
-        return $data instanceof Competence;
+        return $data instanceof GroupeCompetence;
     }
 
     /**
-     * @param Competence $data
+     * @param GroupeCompetence $data
      */
     public function persist($data, array $context = [])
     {
+        dd($context);
         $this->_entityManager->persist($data);
         $this->_entityManager->flush();
        return $data;
@@ -45,12 +46,7 @@ class CompetenceDataPersister implements ContextAwareDataPersisterInterface
     {
         $archive = $data->setIsDeleted(true);
         $this->_entityManager-> persist($archive);
-        $groupes = $data->getGroupeCompetences();
-        foreach ($groupes as $groupe) {
-            $archiveCompetence = $groupe->setIsDeleted(true);
-            $this->_entityManager-> persist($archiveCompetence);
-        }
         $this->_entityManager->flush();
-        return $this->json($archiveCompetence,Response::HTTP_CREATED);
+        return $this->json($archive, Response::HTTP_OK);
     }
 }

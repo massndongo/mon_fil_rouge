@@ -2,13 +2,60 @@
 
 namespace App\Entity;
 
-use App\Repository\ReferentielRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ReferentielRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=ReferentielRepository::class)
+ * @ApiResource(
+ *      routePrefix="/admin",
+ *      attributes={
+ *          "normalization_context"={"groups"={"ref:read","grpeCompRef:read","compRef:read"}}
+ *      },
+ *      collectionOperations={
+*          "create_referentiels"={
+*              "method"="POST",
+*              "path"="/referentiels"
+            },
+ *          "get_all_referentiels"={
+ *              "normalization_context"={"groups"={"ref:read"}},
+ *              "method"="GET",
+ *              "path"="/referentiels"
+ *          },
+ *          "get_all_grpecompetences_in_referentiel"={
+ *              "normalization_context"={"groups"={"grpeCompRef:read"}},
+ *              "method"="GET",
+ *              "path"="/referentiels/grpecompetences"
+ *          }
+ *      },
+ *      itemOperations={
+ *          "get_referentiel"={
+ *              "method"="GET",
+ *              "path"="/referentiels/{id}"
+ *          },
+ *          "get_competences_grpecompetences_in_referentiel"={
+ *              "normalization_context"={"groups"={"compRef:read"}},
+ *              "method"="GET",
+ *              "path"="/referentiels/{idR}/grpecompetences/{id}"
+ *          },
+ *          "delete_referentiel"={
+ *              "method"="DELETE",
+ *              "path"="/referentiels/{id}"
+ *          },
+ *          "set_referentiel"={
+ *              "method"="PUT",
+ *              "path"="/referentiels/{id}"
+ *          }
+ *      }
+ *      
+ * )
+ * @UniqueEntity("libelle",message="Le libelle doit etre unique")
  */
 class Referentiel
 {
@@ -16,31 +63,35 @@ class Referentiel
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"ref:read","compRef:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"ref:read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"ref:read"})
      */
     private $presentation;
 
     /**
      * @ORM\Column(type="string", length=255)
-     */
-    private $programme;
-
-    /**
-     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"ref:read"})
      */
     private $critereEvaluation;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"ref:read"})
      */
     private $critereAdmission;
 
@@ -51,6 +102,8 @@ class Referentiel
 
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, inversedBy="referentiels")
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"grpeCompRef:read","compRef:read"})
      */
     private $groupeCompetence;
 
@@ -59,10 +112,18 @@ class Referentiel
      */
     private $promos;
 
+    /**
+     * @ORM\Column(type="blob", nullable=true)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"ref:read"})
+     */
+    private $programme;
+
     public function __construct()
     {
         $this->groupeCompetence = new ArrayCollection();
         $this->promos = new ArrayCollection();
+        $this->isDeleted = false;
     }
 
     public function getId(): ?int
@@ -90,18 +151,6 @@ class Referentiel
     public function setPresentation(string $presentation): self
     {
         $this->presentation = $presentation;
-
-        return $this;
-    }
-
-    public function getProgramme(): ?string
-    {
-        return $this->programme;
-    }
-
-    public function setProgramme(string $programme): self
-    {
-        $this->programme = $programme;
 
         return $this;
     }
@@ -192,6 +241,18 @@ class Referentiel
                 $promo->setReferentiel(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProgramme()
+    {
+        return base64_encode(stream_get_contents($this->programme));
+    }
+
+    public function setProgramme($programme): self
+    {
+        $this->programme = $programme;
 
         return $this;
     }

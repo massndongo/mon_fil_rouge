@@ -46,27 +46,29 @@ class UserServices{
              case "CM": return "App\Entity\CM";
          }
      }
+     public function getAvatar(Request $request,$key){
+      $uploadedFile = $request->files->get($key);
+
+      if($uploadedFile){
+        $file = $uploadedFile->getRealPath();
+        $avatar = fopen($file, 'r+');
+        $data[$key] = $avatar;
+        return $data[$key];
+      }
+     }
 
     public function addUser(Request $request,$todo){
       if ($todo=="create") {
-              
+        $key = 'avatar';   
         $data = $request->request->all();
         $prf = $data["role"];
         $profile = $this->repo->find($prf);
-
-          $uploadedFile = $request->files->get('avatar');
-
-          if($uploadedFile){
-            $file = $uploadedFile->getRealPath();
-            $avatar = fopen($file, 'r+');
-            $data['avatar'] = $avatar;
-          }
+        $data['avatar'] = $this->getAvatar($request, $key);
           $userType = $this->getUserType($profile);
-
           $user = $this->denormalize->denormalize($data, $userType, 'json');
           $user->setIsDeleted(false);
           $user->setProfil($profile);
-          $password = $user->getPassword();
+          $password = $user->getPassword();                                                                                                                   
           $user->setPassword($this->encoder->encodePassword($user,$password));
 
           return $user;
@@ -74,6 +76,7 @@ class UserServices{
 	  }else {
       $data = $request->request->all();
       $user = $this->userRepo->findOneBy(["id"=>$todo]);
+      $key = 'avatar';
       if ($data["username"]) {
         $user->setUsername($data["username"]);
       }
@@ -81,11 +84,9 @@ class UserServices{
         $password = $user->getPassword();
         $user->setPassword($this->encoder->encodePassword($user, $password));
       }
-      $uploadedFile = $request->files->get('avatar');
-        if($uploadedFile){
-          $file = $uploadedFile->getRealPath();
-          $avatar = fopen($file, 'r+');
-          $user->setAvatar($avatar);
+      $data[$key] = $this->getAvatar($request,$key);
+        if($data[$key]){
+          $user->setAvatar($data[$key]);
         }
         if ($data["nom"]) {
           $user->setNom($data["nom"]);

@@ -8,6 +8,8 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource(
@@ -28,6 +30,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *              "method"="GET",
  *              "path"="/admin/competences/{id}"
  *          },
+ *          "set_competence"={
+ *              "method"="PUT",
+ *              "path"="/admin/competences/{id}"
+ *          },
  *          "delete_competence"={
  *              "method"="DELETE",
  *              "path"="/admin/competences/{id}"
@@ -35,6 +41,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *      }
  * )
  * @ORM\Entity(repositoryClass=CompetenceRepository::class)
+ * @UniqueEntity("libelle",message="Le libelle est unique")
  */
 class Competence
 {
@@ -42,37 +49,45 @@ class Competence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"competence:read","grpecompetence;write"})
+     * @Groups({"competence:read","grpecompetence;write","grpecompetence:read"})
      */
     private $id;
 
     /**
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:read"})
+     * @Assert\NotBlank(message="Le Groupe de competence est obligatoire")
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences", cascade={"persist"})
      */
     private $groupeCompetences;
 
     /**
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competence:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire")
      */
     private $libelle;
 
     /**
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competence:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
      * @ORM\Column(type="string", length=255)
      */
     private $descriptif;
 
     /**
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competence:read","grpecompetence:read"})
      * @ORM\Column(type="boolean")
      */
     private $isDeleted;
 
     /**
      * @Groups({"competence:write","competence:read"})
-     * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competence")
+     * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competence",cascade={"persist"})    
+     * @Assert\Count(
+     *      min = 3,
+     *      max = 3,
+     *      minMessage = "Donnez 3 Niveaux",
+     *      maxMessage = "Vous ne pouvez pas depasser {{ 3 }} Niveaux"
+     * )
      */
     private $niveaux;
 
@@ -80,6 +95,7 @@ class Competence
     {
         $this->groupeCompetences = new ArrayCollection();
         $this->niveaux = new ArrayCollection();
+        $this->isDeleted = false;
     }
 
     public function getId(): ?int
