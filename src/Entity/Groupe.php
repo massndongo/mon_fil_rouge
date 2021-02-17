@@ -2,13 +2,50 @@
 
 namespace App\Entity;
 
-use App\Repository\GroupeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\GroupeRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=GroupeRepository::class)
+ * @ApiResource(
+ *      attributes={
+ *          "denormalization_context"={"groups"={"groupe:write"}}
+ *      },
+ *      routePrefix="/admin",
+ *      collectionOperations={
+ *          "create_groupe"={
+ *              "denormalization_context"={"groups"={"groupe:write"}},
+ *              "method"="POST",
+ *              "path"="/groupes"
+ *          },
+ *          "get_all_groupes"={
+ *              "method"="GET",
+ *              "path"="/groupes"
+ *          },
+ *          "get_apprenants_in_groupes"={
+ *              "method"="GET",
+ *              "path"="/groupes/apprenants"
+ *          }
+ *      },
+ *      itemOperations={
+ *          "get_groupe"={
+ *              "method"="GET",
+ *              "path"="/groupes/{id}"
+ *          },
+ *          "set_groupe"={
+ *              "method"="PUT",
+ *              "path"="/groupes/{id}"
+ *          },
+ *          "del_groupe"={
+ *              "method"="DELETE",
+ *              "path"="/groupes/{id}/apprenants"
+ *          }
+ *      }
+ * )
  */
 class Groupe
 {
@@ -21,31 +58,36 @@ class Groupe
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"groupe:write"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"groupe:write"})
      */
     private $dateCreation;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="boolean")
      */
     private $statut;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"groupe:write"})
      */
     private $type;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Formateur::class, inversedBy="groupes")
+     * @ORM\ManyToMany(targetEntity=Formateur::class, inversedBy="groupes",cascade={"persist"})
+     * @Groups({"groupe:write"})
      */
     private $formateur;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Apprenant::class, inversedBy="groupes")
+     * @ORM\ManyToMany(targetEntity=Apprenant::class, inversedBy="groupes",cascade={"persist"})
+     * @Groups({"groupe:write"})
      */
     private $apprenant;
 
@@ -56,6 +98,7 @@ class Groupe
 
     /**
      * @ORM\ManyToOne(targetEntity=Promo::class, inversedBy="groupes")
+     * @Groups({"groupe:write"})
      */
     private $promo;
 
@@ -63,6 +106,8 @@ class Groupe
     {
         $this->formateur = new ArrayCollection();
         $this->apprenant = new ArrayCollection();
+        $this->isDeleted = false;
+        $this->statut = false;
     }
 
     public function getId(): ?int

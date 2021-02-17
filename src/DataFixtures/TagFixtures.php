@@ -7,7 +7,7 @@ use App\Entity\Tag;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
-class UserFixtures extends Fixture
+class TagFixtures extends Fixture
 {
     public const TAG_REFERENCE = 'tag';
 

@@ -62,7 +62,7 @@ class UserServices{
         $key = 'avatar';   
         $data = $request->request->all();
         $prf = $data["role"];
-        $profile = $this->repo->find($prf);
+        $profile = $this->repo->findOneBy(["libelle"=>$prf]);
         $data['avatar'] = $this->getAvatar($request, $key);
           $userType = $this->getUserType($profile);
           $user = $this->denormalize->denormalize($data, $userType, 'json');
@@ -75,6 +75,11 @@ class UserServices{
 
 	  }else {
       $data = $request->request->all();
+      if (!$data) {
+        $data = json_decode($request->getContent(), true);
+        
+      }
+      //return $data;
       $user = $this->userRepo->findOneBy(["id"=>$todo]);
       $key = 'avatar';
       if ($data["username"]) {
@@ -97,7 +102,7 @@ class UserServices{
         if ($data["email"]) {
           $user->setEmail($data["email"]);
         }
+        return $user;
     }
-    return $user;
   }
 }

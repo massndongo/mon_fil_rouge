@@ -4,39 +4,44 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CompetenceRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
+ * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
  * @ApiResource(
- *      denormalizationContext={"groups"={"competence:write"}},
+ *      
+ *      routePrefix="/admin",
  *      normalizationContext={"groups"={"competence:read"}},
+ *      denormalizationContext={"groups"={"competence:write"}},
  *      collectionOperations={
-*          "create_competences"={
-*              "method"="POST",
-*              "path"="/admin/competences"
-            },
- *          "get_all_competence"={
+ *          "create_competence"={
+ *              "method"="POST",
+ *              "path"="competences",
+ *          },
+ *          "get_all_competences"={
  *              "method"="GET",
- *              "path"="/admin/competences"
+ *              "path"="/all/competences"
  *          }
  *      },
  *      itemOperations={
  *          "get_competence"={
  *              "method"="GET",
- *              "path"="/admin/competences/{id}"
+ *              "path"="/all/competences/{id}"
  *          },
  *          "set_competence"={
  *              "method"="PUT",
- *              "path"="/admin/competences/{id}"
+ *              "path"="/competences/{id}"
  *          },
  *          "delete_competence"={
  *              "method"="DELETE",
- *              "path"="/admin/competences/{id}"
+ *              "path"="/competences/{id}"
  *          }
  *      }
  * )
@@ -49,38 +54,38 @@ class Competence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"competence:read","grpecompetence;write","grpecompetence:read"})
+     * @Groups({"competence:read","competenceIngrpe:read","grpecompetence:read","grpecompetence:write"})
      */
     private $id;
 
     /**
-     * @Groups({"competence:read"})
-     * @Assert\NotBlank(message="Le Groupe de competence est obligatoire")
-     * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences", cascade={"persist"})
-     */
-    private $groupeCompetences;
-
-    /**
-     * @Groups({"competence:write","competence:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
+     * @Groups({"competence:write","competenceIngrpe:read","competence:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire")
      */
     private $libelle;
 
     /**
-     * @Groups({"competence:write","competence:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
+     * @Groups({"competence:write","competence:read","competenceIngrpe:read","grpecompetence:read","grpeCompRef:read","compRef:read"})
      * @ORM\Column(type="string", length=255)
      */
     private $descriptif;
 
     /**
-     * @Groups({"competence:write","competence:read","grpecompetence:read"})
+     * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences")
+     * @Groups({"competence:write","competence:read"})
+     * @Assert\NotBlank(message="Le Groupe de competence est obligatoire")
+     */
+    private $groupeCompetences;
+
+    /**
+     * @Groups({"competence:read","grpecompetence:read"})
      * @ORM\Column(type="boolean")
      */
     private $isDeleted;
 
     /**
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competenceIngrpe:read","competence:read"})
      * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competence",cascade={"persist"})    
      * @Assert\Count(
      *      min = 3,
@@ -115,6 +120,7 @@ class Competence
     {
         if (!$this->groupeCompetences->contains($groupeCompetence)) {
             $this->groupeCompetences[] = $groupeCompetence;
+            $groupeCompetence->addCompetence($this);
         }
 
         return $this;

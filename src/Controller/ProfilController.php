@@ -40,5 +40,20 @@ class ProfilController extends AbstractController
         }
         return $this->json(["message" => self::RESOURCE_NOT_FOUND],Response::HTTP_NOT_FOUND);
     }
+    /**
+         * @Route(
+         *     path="/api/admin/profils",
+         *     methods={"GET"},
+         * )
+         */
+        public function getProfil()
+        {
+            $profil = $this->profilRepository->findAll();
+            if($profil ){
+                $profil = $this->serializer->normalize($profil,null,["groups" => [self::PROFIL_READ]]);
+                return $this->json($profil,Response::HTTP_OK);
+            }
+            return $this->json(["message" => self::RESOURCE_NOT_FOUND],Response::HTTP_NOT_FOUND);
+        }
 
 }

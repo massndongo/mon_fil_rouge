@@ -33,6 +33,7 @@ class CompetenceDataPersister implements ContextAwareDataPersisterInterface
     {
         $this->_entityManager->persist($data);
         $this->_entityManager->flush();
+
        return $data;
     }
 
@@ -43,14 +44,14 @@ class CompetenceDataPersister implements ContextAwareDataPersisterInterface
     
     public function remove($data, array $context = [])
     {
-        $archive = $data->setIsDeleted(true);
-        $this->_entityManager-> persist($archive);
-        $groupes = $data->getGroupeCompetences();
-        foreach ($groupes as $groupe) {
-            $archiveCompetence = $groupe->setIsDeleted(true);
-            $this->_entityManager-> persist($archiveCompetence);
-        }
-        $this->_entityManager->flush();
-        return $this->json($archiveCompetence,Response::HTTP_CREATED);
+        // $archive = $data->setIsDeleted(true);
+        // $this->_entityManager-> persist($archive);
+        // $groupes = $data->getGroupeCompetences();
+        // foreach ($groupes as $groupe) {
+        //     $archiveCompetence = $groupe->setIsDeleted(true);
+        //     $this->_entityManager-> persist($archiveCompetence);
+        // }
+        // $this->_entityManager->flush();
+        // return $this->json($archiveCompetence,Response::HTTP_CREATED);
     }
 }

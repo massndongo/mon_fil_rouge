@@ -17,54 +17,44 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
+ * @ORM\Entity(repositoryClass=ProfilRepository::class)
  * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
  * @ApiResource(
  *      routePrefix="/admin",
  *      normalizationContext={"groups"={"profil:read"}},
  *      collectionOperations={
- *          "get_profils"={
- *              "method"="GET",
- *              "path"="/profils",
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
- *          },
  *          "create_profil"={
  *              "method"="POST",
  *              "path"="/profils",
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
- *          }
+ *          },
+ *          "get_profils"={
+ *              "method"="GET",
+ *              "path"="/profils"
+ *          },
  *       },
  *      itemOperations={
  *          "get_profil"={
  *              "method"="GET",
  *              "path"="/profils/{id}",
  *              "requirements"={"id"="\d+"},
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
  *          },
  *          "update_profil"={
  *              "method"="PUT",
  *              "path"="/profils/{id}",
  *              "requirements"={"id"="\d+"},
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
  *          },
  *          "delete"={
  *              "method"="DELETE",
  *              "path"="/profils/{id}",
  *              "requirements"={"id"="\d+"},
- *              "security"="is_granted('ROLE_ADMIN')",
- *              "security_message"="Vous n'avez pas access à cette Ressource"
  *          }
  *      },
  *     attributes={
- *          "pagination_items_per_page"=4,
- *          "security"="is_granted('ROLE_ADMIN')"
+ *          "security"="is_granted('ROLE_ADMIN')",
+ *          "security_message"="Vous n'avez pas access à cette Ressource"
  *          }
  * ) 
  * @UniqueEntity("libelle")
- * @ORM\Entity(repositoryClass=ProfilRepository::class)
  */
 class Profil
 {
@@ -72,7 +62,7 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"profilUsers:read"})
+     * @Groups({"profilUsers:read","profil:read"})
      */
     private $id;
 

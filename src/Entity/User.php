@@ -10,6 +10,7 @@ use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -20,6 +21,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\DiscriminatorColumn(name="discriminator", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "formateur" = "Formateur", "apprenant" = "Apprenant","cm"="Cm"})
  * @ApiFilter(BooleanFilter::class, properties={"isDeleted"})
+ * @ApiFilter(SearchFilter::class, properties={"username"})
  * @ApiResource(
  *      routePrefix="/admin",
  *      normalizationContext={"groups"={"user:read"}},
@@ -52,7 +54,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *              "method"="GET",
  *              "path"="/users/{id}"
  *          }
- *      }      
+ *      },
+ * 
+ *     attributes={
+ *          "pagination_items_per_page"=500
+ *          },    
  * )
  * 
  * 
@@ -64,14 +70,14 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"user","user:read"})
+     * @Groups({"user:read","groupe:write"})
      * 
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user","user:read","profilUsers:read","profilSortie:read"})
+     * @Groups({"user","user:read","profil:read","profilUsers:read","profilSortie:read"})
      * @Assert\NotBlank(message="Le nom est obligatoire")
      */
     private $nom;
@@ -88,7 +94,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user","user:read","profilUsers:read","profilSortie:read"})
+     * @Groups({"user","user:read","profil:read","profilUsers:read","profilSortie:read"})
      * @Assert\NotBlank(message="Le prenom est obligatoire")
      */
     private $prenom;
@@ -118,13 +124,13 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"user","user:read"})
+     * @Groups({"user:read"})
      */
     private $isDeleted;
 
     /**
      * @ORM\Column(type="blob")
-     * @Groups({"user","user:read"})
+     * @Groups({"user","profil:read","user:read"})
      */
     private $avatar;
 

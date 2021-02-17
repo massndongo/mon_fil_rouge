@@ -48,6 +48,7 @@ class UserController extends AbstractController
     {
         $todo = $id;
         $user = $this->userService->addUser($request,$todo);
+        // return $this->json([$user]);
         $this->manager->persist($user);
         $this->manager->flush();
         return $this->json($userService,Response::HTTP_OK);

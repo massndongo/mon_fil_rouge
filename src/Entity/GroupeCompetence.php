@@ -37,7 +37,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          },
  *          "get_grpecompetences_grpecompetences"={
  *              "method"="GET",
- *              "path"="/admin/grpecompetences/{id}/competences"
+ *              "path"="/admin/grpecompetences/{id}/competences",
+ *              "normalization_context"={"groups"={"competenceIngrpe:read"}},
  *          },
  *          "delete_grpecompetence"={
  *              "method"="DELETE",
@@ -58,20 +59,20 @@ class GroupeCompetence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"competence:read","grpecompetence:read","compRef:read"})
+     * @Groups({"competence:read","competence:write","grpecompetence:read","competenceIngrpe:read","grpecompetence:read","compRef:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:read","grpecompetence:read","grpecompetence:write","grpeCompRef:read"})
+     * @Groups({"grpecompetence:read","grpecompetence:write","grpeCompRef:read"})
      * @Assert\NotBlank(message="Le libelle est obligatoire")
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:read","grpecompetence:write","grpeCompRef:read"})
+     * @Groups({"grpecompetence:write","grpecompetence:read","grpeCompRef:read"})
      * @Assert\NotBlank(message="Le desciptif est obligatoire")
      */
     private $descriptif;
@@ -83,7 +84,7 @@ class GroupeCompetence
 
     /**
      * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupeCompetences", cascade={"persist"})
-     * @Groups({"grpecompetence:read","grpecompetence:write","grpeCompRef:read","compRef:read"})
+     * @Groups({"grpecompetence:read","grpecompetence:write","competenceIngrpe:read", "grpeCompRef:read","compRef:read"})
      * @Assert\NotBlank(message="Le champ competence est obligatoire")
      */
     private $competences;

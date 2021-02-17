@@ -21,19 +21,19 @@ class Niveau
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competenceIngrpe:read","competence:read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competenceIngrpe:read","competence:read"})
      */
     private $critereEvaluation;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competence:write","competence:read"})
+     * @Groups({"competence:write","competenceIngrpe:read","competence:read"})
      */
     private $groupeAction;
 

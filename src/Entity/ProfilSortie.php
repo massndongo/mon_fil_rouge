@@ -46,9 +46,6 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *              }
  *          
  *      },
- *     attributes={
- *          "pagination_items_per_page"=6
- *          },
  *
  * )
  * @ORM\Entity(repositoryClass=ProfilSortieRepository::class)
